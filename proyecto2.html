@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Proyecto de Análisis Temporal de la Actividad Sísmica en México">
+    <title>Proyecto 1 - Análisis Temporal de la Actividad Sísmica en México - Kevin Pantaleón García</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Kevin Pantaleón García</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="sobre-mi.html">Sobre Mí</a></li>
+                    <li><a href="educacion.html">Educación</a></li>
+                    <li><a href="proyectos.html">Proyectos</a></li>
+                    <li><a href="cv.html">CV</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <nav>
+        <h2>Índice</h2>
+        <ul>
+            <li><a href="#introduccion">Introducción</a></li>
+            <li><a href="#objetivos">Objetivos del análisis</a></li>
+            <li><a href="#metodologia">Metodología</a></li>
+            <li><a href="#analisis">Análisis</a></li>
+            <li><a href="#conclusiones">Conclusiones</a></li>
+        </ul>
+    </nav>
+
+    <section id="introduccion">
+        <h2>Introducción</h2>
+        <p>Este proyecto se enfoca en el análisis temporal de la actividad sísmica en México utilizando datos del Servicio Sismológico Nacional. Se realizó una limpieza y filtrado de datos para entender la frecuencia de sismos, patrones de magnitud y la concentración de sismos por estados y regiones.</p>
+    </section>
+
+    <section id="objetivos">
+        <h2>Objetivos del análisis</h2>
+        <p>El objetivo principal de este análisis es determinar las tendencias y patrones en la actividad sísmica a lo largo del tiempo, haciendo énfasis en los sismos de mayor magnitud y su distribución geográfica.</p>
+    </section>
+
+    <section id="metodologia">
+        <h2>Metodología</h2>
+        <img src="assets/project1.png" alt="Mapa de Sismos en México" width="640" height="480" >
+        <p>La metodología empleada incluyó la recolección de datos, limpieza de valores faltantes, creación de nuevas columnas para mejorar el análisis (por ejemplo, año, mes, estado) y la visualización de los resultados mediante gráficos y mapas.</p>
+    </section>
+
+    <section id="analisis">
+        <h2>Análisis</h2>
+        <pre><code># Código de ejemplo utilizado en el análisis
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Cargar datos
+df = pd.read_csv('sismos.csv')
+
+# Filtrar por sismos mayores a magnitud 6
+df_fuertes = df[df['magnitud'] >= 6]
+
+# Graficar la frecuencia de sismos por año
+df.groupby('año').size().plot(kind='bar')
+plt.show()
+        </code></pre>
+    </section>
+
+    <section id="conclusiones">
+        <h2>Conclusiones</h2>
+        <p>El análisis muestra que la actividad sísmica en México sigue patrones cíclicos, con mayor frecuencia de sismos en ciertas regiones y una clara concentración de sismos fuertes en zonas de actividad tectónica significativa.</p>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Kevin Pantaleón García. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

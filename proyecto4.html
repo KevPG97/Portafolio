@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Proyecto de Análisis de COVID-19 en México">
+    <title>Proyecto 1: Análisis de COVID-19 en México - Kevin Pantaleón García</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Kevin Pantaleón García</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="sobre-mi.html">Sobre Mí</a></li>
+                    <li><a href="educacion.html">Educación</a></li>
+                    <li><a href="proyectos.html">Proyectos</a></li>
+                    <li><a href="cv.html">CV</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="project-detail">
+        <div class="container">
+            <h2>Proyecto 1: Análisis de COVID-19 en México</h2>
+            <p>En este proyecto se realiza un análisis exploratorio de los casos de COVID-19 en México utilizando Python y R. El objetivo principal es visualizar y entender la evolución de los contagios en diferentes estados del país.</p>
+            <h3>Gráfica de Resultados</h3>
+            <img src="assets/project4.png" alt="Gráfica de COVID-19 en México" class="project-image">
+            
+            <h3>Código Python Utilizado</h3>
+            <pre>
+<code>
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Cargar los datos
+data = pd.read_csv('covid_mexico.csv')
+
+# Filtrar por estado y realizar el análisis
+estado = 'Ciudad de México'
+estado_data = data[data['estado'] == estado]
+
+# Graficar la evolución de los casos
+plt.plot(estado_data['fecha'], estado_data['casos'])
+plt.title(f'Casos de COVID-19 en {estado}')
+plt.xlabel('Fecha')
+plt.ylabel('Número de Casos')
+plt.show()
+</code>
+            </pre>
+            <p>Puedes descargar el script completo <a href="assets/scripts/script1.py" download>Aquí</a>.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <ul>
+                <li><a href="mailto:kevin97aa17@ciencias.unam.mx">Correo</a></li>
+                <li><a href="https://linkedin.com/in/kevinpantaleóngarcía">LinkedIn</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>
