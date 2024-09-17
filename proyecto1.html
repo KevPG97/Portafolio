@@ -37,41 +37,303 @@
 
     <section id="introduccion">
         <h2>Introducción</h2>
-        <p>Este proyecto se enfoca en el análisis temporal de la actividad sísmica en México utilizando datos del Servicio Sismológico Nacional. Se realizó una limpieza y filtrado de datos para entender la frecuencia de sismos, patrones de magnitud y la concentración de sismos por estados y regiones.</p>
+        <p>México es un país altamente sísmico debido a su ubicación geográfica, donde convergen 
+            varias placas tectónicas, como la placa de Cocos, la placa del Pacífico y la placa de Norteamérica. 
+            Los sismos han tenido un impacto considerable en la infraestructura, la economía y la vida cotidiana de los mexicanos. 
+            Estudiar la actividad sísmica a lo largo del tiempo es crucial para identificar patrones y mejorar las estrategias de prevención y mitigación de riesgos. 
+            Además, la información obtenida puede ayudar a las autoridades a planificar políticas públicas y reforzar 
+            las medidas de seguridad en zonas propensas a temblores. 
+            Este análisis busca entender mejor la evolución de los sismos en México 
+            desde 1900 hasta 2024, enfocándose en la frecuencia y magnitud de los eventos sísmicos. 
+        </p>
     </section>
 
     <section id="objetivos">
         <h2>Objetivos del análisis</h2>
-        <p>El objetivo principal de este análisis es determinar las tendencias y patrones en la actividad sísmica a lo largo del tiempo, haciendo énfasis en los sismos de mayor magnitud y su distribución geográfica.</p>
+        <p>Los objetivos de este proyecto son
+            
+        <ul>    
+            <li>Analizar la actividad sísmica a lo largo del tiempo
+            haciendo énfasis en los sismos de mayor magnitud y su distribución geográfica.</li> 
+            <li> Conocer en qué mes se registró la mayor cantidad de sismos y sismos fuertes.</li> 
+            <li> Como ha variado la frecuencia de sismos en México a lo largo del tiempo.</li>
+            <li> Observar gráficamente la correlación que existe entre la 
+                ubicación de las placas tectónicas y la localización de los sismos</li>
+        </ul>
+        </p>
+
     </section>
 
     <section id="metodologia">
         <h2>Metodología</h2>
-        <img src="assets/project1.png" alt="Mapa de Sismos en México" width="640" height="480" >
-        <p>La metodología empleada incluyó la recolección de datos, limpieza de valores faltantes, creación de nuevas columnas para mejorar el análisis (por ejemplo, año, mes, estado) y la visualización de los resultados mediante gráficos y mapas.</p>
+        <h3>Bases de Datos Utilizadas:</h3>
+        <ol>
+            <li><strong>Catálogo de Sismos de México (1900-2024):</strong> 
+                <p>Proporcionado por el Servicio Sismológico Nacional (SSN), contiene información detallada sobre eventos sísmicos en México. 
+                Las principales variables son:</p>
+                <ul>
+                    <li>Fecha: Fecha en que ocurrió el sismo.</li>
+                    <li>Magnitud: Tamaño del sismo, medido en la escala de Richter o momento.</li>
+                    <li>Latitud y Longitud: Coordenadas geográficas del epicentro.</li>
+                    <li>Profundidad: Profundidad del sismo en kilómetros.</li>
+                    <li>Referencia de localización: Descripción de la ubicación cercana al epicentro.</li>
+                    <li>Fecha y Hora UTC: Versión estandarizada de la hora y fecha.</li>
+                    <li>Estatus: Indicador de revisión del sismo por el SSN.</li>
+                </ul>
+                <p>Fuente: UNAM, Servicio Sismológico Nacional (2024). <a href="http://www2.ssn.unam.mx:8080/catalogo/">Catálogo de Sismos.</a></p>
+            </li>
+            <li><strong>Placas Tectónicas en México:</strong> 
+                <ul>
+                    <li>Latitud y Longitud: Ubicación geográfica de los puntos clave de las placas tectónicas.</li>
+                    <li>Tipo: Clasificación de la zona tectónica.</li>
+                    <p>Fuente: <a href="https://github.com/scidatmath2020">Repositorio en GitHub de SciData Math.</a>: División Política de México y Placas Tectónicas.</p>
+                </ul>
+            </li>
+            <li><strong>División Política de México</strong> 
+                <p>Base de datos que mapea las divisiones geopolíticas en México. Las variables incluyen:</p>
+                <ul>
+                    <li>Latitud y Longitud: Coordenadas geográficas de los límites políticos.</li>
+                    <li>Grupo: Identificación de las divisiones políticas.</li>
+                    <p>Fuente: <a href="https://github.com/scidatmath2020">Repositorio en GitHub de SciData Math.</a>: División Política de México y Placas Tectónicas.</p>
+                </ul>
+        </ol>
+        <h3>Preprocesamiento de Datos:</h3>
+        <p>Para este proyecto trabajamos en Python.</p>
+        <ol>
+            <li><strong>Paquetes y lectura de los datos:</strong> 
+                <pre><code>
+                from siuba import *
+                from siuba.dply.vector import *
+                from plotnine import *
+                import pandas as pd
+                import numpy as np
+                import matplotlib.pyplot as plt
+                import os
+                import seaborn as sns
+                    
+                # Cargamos los datos de los sismos
+                sismos_df = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/Data/SSNMX_catalogo_19000101_20240905_data.csv',encoding="latin-1")
+                mapa_mexico = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/Data/Mexico_division_politica.csv',encoding="latin-1")
+                placas = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/Data/Mexico_placas_tectonicas.csv',encoding="latin-1")
+                    
+                </code></pre>
+            </li>
+            <li><strong>Limpieza de los datos:</strong> 
+                <p>Se corrigieron los nombres de los estados y se identificaron valores faltantes en la columna de magnitud, 
+                    los cuales se reemplazaron con valores nulos cuando no era posible convertirlos. 
+                    También, se cambió el nombre de la columna Referencia de localización.</p>
+                <pre><code>
+                # Agregamos una columna con los estados.
+                sismos_df = sismos_df >> mutate(Estado = _.Referencia.str.split(', ').str[-1].str.strip())
+                sismos_df = sismos_df.rename(columns={'Referencia de localizacion':'Referencia'})
+
+                # Observamos los valores faltantes
+                no_convertibles = sismos_df['Magnitud'][pd.to_numeric(sismos_df['Magnitud'], errors='coerce').isna()].unique()
+                print("Valores no convertibles a float:", no_convertibles)
+
+                # Convertimos los valores faltantes
+                sismos_df['Magnitud'] = sismos_df['Magnitud'].replace('no calculable', np.nan).astype(float)
+                
+                #Remplazamos los estados repetidos
+                sismos_df['Estado'] = sismos_df['Estado'].replace('N','NL')           
+                </code></pre>
+            </li>
+            <li><strong>Conversion de formato:</strong>
+                <p>Las fechas fueron estandarizadas y se agregaron columnas para el año y el mes, 
+                facilitando el análisis temporal.</p>
+                <pre><code>
+                # Agregamos una columna de Año y otra de Mes
+                sismos_df['Fecha'] = pd.to_datetime(sismos_df['Fecha'], format='%d/%m/%Y')
+                sismos_df = sismos_df >> mutate(Años = _.Fecha.dt.year, Mes = _.Fecha.dt.month)
+
+                #Remplazamos los meses por strings con los nombres
+                meses = {1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
+                         7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'}
+                sismos_df['Mes'] = sismos_df['Mes'].replace(meses)  
+                </code></pre>
+            </li>
+            <li><strong>Observación sobre valores faltantes:</strong>
+                <p>Los valores faltantes de magnitud entre 1974 y 1988 son el resultado de la limitada cobertura 
+                    instrumental durante ese periodo. La instalación de acelerógrafos para registrar movimientos 
+                    sísmicos no comenzó hasta los años 60, y la expansión de la Red Acelerográfica de México fue 
+                    gradual. El crecimiento significativo en la cobertura y calidad de los registros ocurrió 
+                    después del sismo de 1985, lo que explica los datos incompletos previos a esa década.
+                </p>
+            </li>
+        </ol>
     </section>
 
     <section id="analisis">
-        <h2>Análisis</h2>
-        <pre><code># Código de ejemplo utilizado en el análisis
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Cargar datos
-df = pd.read_csv('sismos.csv')
-
-# Filtrar por sismos mayores a magnitud 6
-df_fuertes = df[df['magnitud'] >= 6]
-
-# Graficar la frecuencia de sismos por año
-df.groupby('año').size().plot(kind='bar')
-plt.show()
+        <h2>Análisis.</h2>
+        <h3>Distribución Temporal de los Sismos en México (1900 - 2024).</h3>
+        <p>El análisis de la distribución temporal de la actividad sísmica revela patrones importantes. 
+            A lo largo del tiempo, se observan ciertos periodos de mayor frecuencia de sismos, 
+            especialmente en años recientes. Este fenómeno puede atribuirse a la mejora en los sistemas 
+            de detección y registro a partir de la década de 1970.</p>
+            <p>Diremos que un sismo es un sismo fuerte si su magnitud es mayor o igual a 6, 
+                esto basandonos en la tabla de magnitudes de la escala Richter, 
+                la que considera a los sismos de entre 6 y 6.9 sismos de magnitud fuerte, 
+                cuyos efectos pueden llegar a destruir áreas pobladas, en hasta unos 160 kilómetros a la redonda.
+            </p>
+        <p>A continuación, se detallan los hallazgos clave:</p>    
+        <ul>
+            <li><strong>Frecuencia anual de sismos:</strong> 
+            <p>El número de eventos sísmicos registrados por año muestra un aumento progresivo, sobre todo a partir de la década de 1990. Esto sugiere 
+                una mejora en la tecnología de monitoreo más que un incremento real en la actividad sísmica.</p></li>
+            <pre><code>
+            # Contamos la cantidad de sismos por año
+            sismos_por_anio = sismos_df.groupby('Años').size()
+                
+            # Graficamos sismos_por_anio
+            plt.figure(figsize=(20, 6))
+            sismos_por_anio.plot(kind='bar')
+            plt.title('Número de Sismos por Año en México')
+            plt.xlabel('Año')
+            plt.ylabel('Número de Sismos')
+            plt.show()        
+            </code></pre>
+            <img src="assets/sismos_por_año.png" alt="Sismos por ano en Mexico" width="960" height="720" >
+            
+            <li><strong>Sismos fuertes (magnitud >= 6):</strong>
+                <p>Los sismos de gran magnitud no siguen un patrón tan claro como la frecuencia total de sismos. 
+                    Estos eventos parecen estar distribuidos de manera más esporádica a lo largo del tiempo.</pe></li>
+                <pre><code>
+                #Filtramos los sismos fuertes
+                sismos_fuertes = sismos_df >> filter(_.Magnitud >= 6)
+	
+                #Contamos la cantidad de sismos fuertes por año
+                sismos_fuertes_por_anio = sismos_fuertes.groupby('Años').size()
+                    
+                # Graficamos los resultados
+                plt.figure(figsize=(20, 6))
+                sismos_fuertes_por_anio.plot(kind='bar')
+                plt.title('Número de Sismos Fuertes por Año en México')
+                plt.xlabel('Año')
+                plt.ylabel('Número de Sismos')
+                plt.show()
+                </code></pre>
+                <img src="assets/sismos_fuetes_año.png" alt="Sismos fuertes por anioo en Mexico" width="960" height="720" >
+        </ul>
+        <h3>Distribución Mensual de los Sismos.</h3>
+        <p>El análisis de la frecuencia de sismos por mes muestra que la actividad sísmica está relativamente distribuida de manera uniforme 
+            a lo largo del año. Sin embargo, algunos meses parecen tener más actividad que otros.</p>
+        <pre><code>
+        # Estilo para el gráfico
+        plt.style.use('seaborn-darkgrid') 
+        sns.set_palette("muted")           
+            
+        # Creamos la figura y los subplots
+        fig, axs = plt.subplots(2, 1, figsize=(10, 10))
+            
+        # Gráfico 1: Conteo de sismos por mes
+        sns.barplot(x='Mes', y='Conteo_de_Sismos', data=sismos_por_mes, ax=axs[0], palette="Blues_d")
+        axs[0].set_title('Conteo de Sismos por Mes', fontsize=14)
+        axs[0].set_xlabel('Mes')
+        axs[0].set_ylabel('Conteo de Sismos')
+        axs[0].tick_params(axis='x', rotation=45)  
+            
+        ## Gráfico 2: Conteo de sismos fuertes por mes
+        sns.barplot(x='Mes', y='Conteo_de_Sismos', data=sismos_fuertes_por_mes, ax=axs[1], palette="Blues_d")
+        axs[1].set_title('Conteo de Sismos fuertes por Mes', fontsize=14)
+        axs[1].set_xlabel('Mes')
+        axs[1].set_ylabel('Conteo de Sismos')
+        axs[1].tick_params(axis='x', rotation=45)
+            
+        # Ajustamos el diseño de la figura
+        plt.tight_layout()
+            
+        plt.show()     
         </code></pre>
+        <p>No se observa un patrón claro de estacionalidad en los sismos sin tomar en cuenta su magnitud. 
+            Estos eventos ocurren en diversos meses sin una tendencia marcada. Los meses de septiembre, enero y diciembre parecen 
+            tener una mayor concentración de eventos, aunque la diferencia no es significativa. Los meses de 
+            diciembre y junio tienen una mayor concentración de eventos sísmicos de magnitud mayor o igual a 6, a diferencia de 
+            la creencia popular de que septiembre es el mes con más actividad sísmica fuerte.</p>
+        <img src="assets/conteo_sismos_mes.png" alt="Conteo de sismos y sismos fuertes por mes." width="960" height="720" >
+        <h3>Concentración Geográfica de los Sismos.</h3>
+        <p> La mayor parte de la actividad sísmica en México se concentra en regiones específicas, principalmente 
+            a lo largo de la costa del Pacífico, donde convergen varias placas tectónicas. El análisis geográfico 
+            refuerza la correlación entre las zonas de subducción y la concentración de eventos sísmicos.</p>
+            <p>Utilizamos las bases de datos con la ubicación geográfica de las placas tectónicas y la división política de 
+                la república mexicana junto con la tabla de sismos para comparar su ubicación.</p>
+            <pre><code>
+                #Agregamos una columna llamada Tipos para agrupar respecto a ella
+                sismos_df['Tipos'] = 'Sismos'
+                sismos_fuertes['Tipos'] = 'Sismos fuertes'
+                placas['Tipos'] = 'Placas Tectónicas'
+                
+                # Generamos el gráfico
+                (ggplot() +
+                    # Mapa de México
+                    geom_polygon(data=mapa_mexico,
+                                 mapping=aes(x="Longitud", y="Latitud", group="Grupo"),
+                                 fill="#6d6d6d", color="#bcbcbc", size=0.1) +
+                
+                    # Puntos de sismos 
+                    geom_point(data=sismos_df,
+                               mapping=aes(x="Longitud", y="Latitud", color='Tipos'),
+                               alpha=0.08, size=0.3) +
+                
+                    # Puntos de sismos fuertes
+                    geom_point(data=sismos_fuertes,
+                               mapping=aes(x="Longitud", y="Latitud", color='Tipos'),
+                               alpha=0.8, size=0.5) +
+                
+                    # Líneas de placas tectónicas
+                    geom_path(data=placas,
+                              mapping=aes(x="Longitud", y="Latitud", group="Tipo", color='Tipos'),
+                              size=1) +
+
+                    #Generamos un geom_point para agrrgar las placas a la leyenda
+
+                    geom_point(data=placas,
+                              mapping=aes(x="Longitud", y="Latitud", group="Tipo", color='Tipos'),
+                              size=0.01) +
+                
+                    # Tema, título y etiquetas
+                    #theme_bw() +
+                    labs(title="Mapa de Sismos en México (1900-2024)",
+                         x="Longitud", y="Latitud") +
+                
+                    # Modificamos la leyenda para incluir los colores correctos (usando linetype para placas)
+                    scale_color_manual(values={'Sismos': 'orange', 'Sismos fuertes': 'red', 'Placas Tectónicas': '#ADD8E6'},
+                                       guide=guide_legend(override_aes={'linetype': 'none', 'size': 4}))+
+                
+                    # Estilos adicionales
+                     theme(panel_background=element_rect(fill="#252525"), # Fondo oscuro
+                          panel_grid_major=element_blank(),
+                          panel_grid_minor=element_blank(),
+                          axis_text=element_text(color="white"), 
+                          axis_title=element_text(color="white"),
+                          plot_title=element_text(color="white", size=14, face="bold"),  
+                          plot_subtitle=element_text(color="white", size=10),  
+                          legend_background=element_rect(fill="#252525"),  
+                          legend_title=element_text(color="white"),  
+                          legend_text=element_text(color="white"),  
+                          plot_background=element_rect(fill="#252525"),
+                          legend_position="right")  
+                )                
+            </code></pre>
+        <img src="assets/project1.png" alt="Analisis geoespacial de sismos." width="960" height="720" >
     </section>
 
     <section id="conclusiones">
         <h2>Conclusiones</h2>
-        <p>El análisis muestra que la actividad sísmica en México sigue patrones cíclicos, con mayor frecuencia de sismos en ciertas regiones y una clara concentración de sismos fuertes en zonas de actividad tectónica significativa.</p>
+        <p>El análisis de la actividad sísmica en México sugiere una fuerte correlación 
+            entre los eventos sísmicos y las zonas geológicas activas, particularmente en la 
+            región del Pacífico. La mejora en los sistemas de monitoreo a lo largo del siglo XX 
+            ha permitido un mejor seguimiento de estos eventos, aunque persisten ciertos vacíos en 
+            los datos históricos.
+        </p>
+        <p><strong>Puntos clave:</strong></p>
+        <ul>
+            <li>La frecuencia de sismos ha aumentado con los años, principalmente debido 
+                a la mejora en los sistemas de registro.</li>    
+            <li>Septiembre, diciembre, enero y febrero son los meses en que más sismos se han registrado, 
+                aunque la diferencia con el resto de los meses no es significativa. </li>
+            <li>Diciembre es el mes con más sismos fuertes registrados.</li>
+        </ul>
+        <a href="assets/An_temp_sismos.ipynb" download="An_temp_sismos.ipynb">Descarga el scrip completo.</a>
     </section>
 
     <footer>
