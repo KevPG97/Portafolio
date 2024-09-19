@@ -257,3 +257,50 @@ header nav ul li a:hover {
     border-radius: 10%; /* Si quieres que la imagen sea circular */
 }
 
+.about-me {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.card.reverse {
+    flex-direction: row-reverse;
+}
+
+.card-text {
+    flex: 1;
+}
+
+.card-img img {
+    width: 250px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .card, .card.reverse {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .card.reverse {
+        flex-direction: column;
+    }
+
+    .card-img img {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+}
+
+
